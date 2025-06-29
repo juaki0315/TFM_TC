@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnóstico de Tendinopatía</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>🩻 Diagnóstico de Tendinopatía</h1>
+
+        <div class="upload-area" id="upload-area">
+            <p>Arrastra una radiografía aquí o haz clic para seleccionar</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <div id="preview-container">
+            <img id="preview" src="#" alt="Vista previa" style="display: none;" />
+        </div>
+
+        <button id="predict-btn" onclick="sendImage()">Predecir</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const preview = document.getElementById('preview');
+        const status = document.getElementById('status');
+        const uploadArea = document.getElementById('upload-area');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            fileInput.files = e.dataTransfer.files;
+            showPreview(file);
+        });
+
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (file) showPreview(file);
+        });
+
+        function showPreview(file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+        }
+
+        async function sendImage() {
+            const file = fileInput.files[0];
+            if (!file) {
+                status.innerHTML = "<span class='error'>⚠️ Por favor, selecciona una imagen.</span>";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            status.innerHTML = "<span class='loading'>🔄 Procesando...</span>";
+            
+            try {
+                const response = await fetch("/predict/", {
+                    method: "POST",
+                    body: formData
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    const label = result.prediction === 1 ? "Tendinopatía Detectada" : "Sin Tendinopatía";
+                    const icon = result.prediction === 1 ? "🟥" : "🟩";
+                    status.innerHTML = `<span class='result'>${icon} <strong>${label}</strong></span>`;
+                } else {
+                    status.innerHTML = `<span class='error'>❌ Error: ${result.error}</span>`;
+                }
+            } catch (e) {
+                status.innerHTML = `<span class='error'>❌ Error inesperado</span>`;
+            }
+        }
+    </script>
+</body>
+</html>
