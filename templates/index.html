@@ -12,7 +12,8 @@
 
         <div class="upload-area" id="upload-area">
             <p>Arrastra una radiografía aquí o haz clic para seleccionar</p>
-            <input type="file" id="fileInput" accept="image/*">
+            <input type="file" id="fileInput" accept="image/*" style="display:none;">
+            <p id="file-name" class="file-name"></p>
         </div>
 
         <div id="preview-container">
@@ -27,6 +28,7 @@
         const fileInput = document.getElementById('fileInput');
         const preview = document.getElementById('preview');
         const status = document.getElementById('status');
+        const fileName = document.getElementById('file-name');
         const uploadArea = document.getElementById('upload-area');
 
         uploadArea.addEventListener('click', () => fileInput.click());
@@ -54,14 +56,26 @@
         });
 
         function showPreview(file) {
+            if (!file.type.startsWith('image/')) {
+                status.innerHTML = "<span class='error'>⚠️ El archivo debe ser una imagen.</span>";
+                return;
+            }
+
             preview.src = URL.createObjectURL(file);
             preview.style.display = 'block';
+            status.innerHTML = "";
+            fileName.textContent = `📁 ${file.name}`;
         }
 
         async function sendImage() {
             const file = fileInput.files[0];
             if (!file) {
                 status.innerHTML = "<span class='error'>⚠️ Por favor, selecciona una imagen.</span>";
+                return;
+            }
+
+            if (!file.type.startsWith('image/')) {
+                status.innerHTML = "<span class='error'>⚠️ El archivo debe ser una imagen.</span>";
                 return;
             }
 

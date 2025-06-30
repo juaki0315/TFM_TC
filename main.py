@@ -1,38 +1,65 @@
-from fastapi import FastAPI, UploadFile, File, Request
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import shutil
 import os
+import shutil
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import joblib
 
-from preprocess import preprocess_image
-from feature_extractor import extract_features
-from model_utils import load_model, predict
+from model_utils import load_model
+from feature_extractor import preprocess_image, extract_features_from_image
 
 app = FastAPI()
-model = load_model("mejor_modelo.pkl")
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+# Cargar modelos una vez
+modelo_pipeline = load_model("mejor_modelo.pkl")
+final_features = joblib.load("final_features.pkl")
+
 @app.get("/")
-async def root(request: Request):
+async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.post("/predict/")
-async def predict_from_image(file: UploadFile = File(...)):
-    temp_path = os.path.join("temp", file.filename)
-
-    with open(temp_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
+async def predict_endpoint(
+    file: UploadFile = File(...),
+    sex: str = Form(...),
+    birthdate: str = Form(...)
+):
     try:
+        temp_dir = "temp"
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_path = os.path.join(temp_dir, file.filename)
+        with open(temp_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+
+        # Preprocesar imagen y extraer features
         img = preprocess_image(temp_path)
-        features = extract_features(img)
-        pred = predict(model, features)
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
-    finally:
+        features = extract_features_from_image(img)
         os.remove(temp_path)
 
-    return JSONResponse(content={"prediction": int(pred)})
+        # Calcular edad
+        fecha_nac = pd.to_datetime(birthdate)
+        hoy = pd.to_datetime("today")
+        edad = (hoy - fecha_nac).days // 365
+
+        # Construir dict
+        data = {f"feature_{i+1}": features[i] for i in range(len(features))}
+        data["edad"] = edad
+        data["sex"] = sex
+
+        df = pd.DataFrame([data])
+        for col in final_features:
+            if col not in df.columns:
+                df[col] = np.nan
+        df = df[final_features]
+
+        pred = modelo_pipeline.predict(df)[0]
+        return {"prediction": int(pred)}
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
