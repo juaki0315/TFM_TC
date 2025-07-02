@@ -27,13 +27,13 @@ def preprocess_image(image_path):
     else:
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
 
-    image = cv2.resize(image, (224, 224))
+    image = cv2.resize(image, (300, 300))
     image = np.stack([image] * 3, axis=-1)  # (H, W) → (H, W, 3)
     image = image.astype("float32") / 255.0
     return image
 
 # Extraer y reducir features (512,)
 def extract_features_from_image(img_tensor):
-    fmap = feature_extractor.predict(np.expand_dims(img_tensor, axis=0))  # (1, H, W, C)
+    fmap = feature_extractor.predict(np.expand_dims(img_tensor, axis=0))
     pooled = GlobalMaxPooling2D()(fmap).numpy().squeeze()
     return pooled

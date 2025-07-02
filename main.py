@@ -40,6 +40,9 @@ async def predict_endpoint(
         # Preprocesar imagen y extraer features
         img = preprocess_image(temp_path)
         features = extract_features_from_image(img)
+        print("Características extraídas (vector de 512):")
+        print(features)
+
         os.remove(temp_path)
 
         # Calcular edad
@@ -47,10 +50,14 @@ async def predict_endpoint(
         hoy = pd.to_datetime("today")
         edad = (hoy - fecha_nac).days // 365
 
-        # Construir dict
+        # Mapeo de sexo (ajústalo según cómo entrenaste el modelo)
+        sexo_mapeado = {"M": 0, "F": 1}
+        sexo_transformado = sexo_mapeado.get(sex)
+
+        # Construir dict con features + edad + sexo transformado
         data = {f"feature_{i+1}": features[i] for i in range(len(features))}
         data["edad"] = edad
-        data["sex"] = sex
+        data["sex"] = sexo_transformado
 
         df = pd.DataFrame([data])
         for col in final_features:
@@ -58,6 +65,9 @@ async def predict_endpoint(
                 df[col] = np.nan
         df = df[final_features]
 
+        print("DataFrame final que se pasa al modelo:")
+        print(df.head())
+        
         pred = modelo_pipeline.predict(df)[0]
         return {"prediction": int(pred)}
 
