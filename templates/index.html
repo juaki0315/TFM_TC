@@ -12,20 +12,10 @@
 
         <form id="upload-form" onsubmit="event.preventDefault(); sendImage();">
             <div class="upload-area" id="upload-area">
-                <p>Arrastra una radiografía (.jpg, .png, .dcm) o haz clic para seleccionar</p>
-                <input type="file" id="fileInput" name="file" accept=".dcm,image/*" style="display:none;">
+                <p>Arrastra un archivo DICOM (.dcm) o haz clic para seleccionar</p>
+                <input type="file" id="fileInput" name="file" accept=".dcm" style="display:none;">
                 <p id="file-name" class="file-name"></p>
             </div>
-
-            <label for="sex">Sexo:</label>
-            <select id="sex" name="sex" required>
-                <option value="">Selecciona</option>
-                <option value="M">Masculino</option>
-                <option value="F">Femenino</option>
-            </select>
-
-            <label for="birthdate">Fecha de nacimiento:</label>
-            <input type="date" id="birthdate" name="birthdate" required>
 
             <div id="preview-container">
                 <img id="preview" src="#" alt="Vista previa" style="display: none;" />
@@ -69,39 +59,27 @@
         });
 
         function showPreview(file) {
-            const isImage = file.type.startsWith('image/');
             const isDcm = file.name.toLowerCase().endsWith('.dcm');
 
-            if (!isImage && !isDcm) {
-                status.innerHTML = "<span class='error'>⚠️ El archivo debe ser una imagen o un DICOM (.dcm).</span>";
+            if (!isDcm) {
+                status.innerHTML = "<span class='error'>⚠️ Solo se aceptan archivos DICOM (.dcm).</span>";
                 return;
             }
 
-            if (isImage) {
-                preview.src = URL.createObjectURL(file);
-                preview.style.display = 'block';
-            } else {
-                preview.style.display = 'none';
-            }
-
+            preview.style.display = 'none';  // No vista previa para DICOM
             status.innerHTML = "";
             fileName.textContent = `📁 ${file.name}`;
         }
 
         async function sendImage() {
             const file = fileInput.files[0];
-            const sex = document.getElementById('sex').value;
-            const birthdate = document.getElementById('birthdate').value;
-
-            if (!file || !sex || !birthdate) {
-                status.innerHTML = "<span class='error'>⚠️ Rellena todos los campos y selecciona un archivo.</span>";
+            if (!file) {
+                status.innerHTML = "<span class='error'>⚠️ Selecciona un archivo DICOM.</span>";
                 return;
             }
 
             const formData = new FormData();
             formData.append("file", file);
-            formData.append("sex", sex);
-            formData.append("birthdate", birthdate);
 
             status.innerHTML = "<span class='loading'>🔄 Procesando...</span>";
 
