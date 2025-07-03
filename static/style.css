@@ -2,7 +2,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Inter', sans-serif;
-    background-color: #eef1f5;
+    background-color: #0f172a;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -10,39 +10,40 @@ body {
 }
 
 .container {
-    background-color: white;
+    background-color: #1e293b;
     padding: 40px;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     width: 90%;
     max-width: 500px;
     text-align: center;
+    color: #f1f5f9;
 }
 
 h1 {
-    font-size: 24px;
-    margin-bottom: 20px;
+    font-size: 26px;
+    margin-bottom: 25px;
     font-weight: 600;
-    color: #2c3e50;
+    color: #38bdf8;
 }
 
 .upload-area {
-    border: 2px dashed #aaa;
+    border: 2px dashed #64748b;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
-    background-color: #fafafa;
-    transition: border-color 0.3s;
+    background-color: #334155;
+    transition: all 0.3s ease;
 }
 
 .upload-area.dragover {
-    border-color: #3498db;
-    background-color: #e6f2fb;
+    border-color: #38bdf8;
+    background-color: #1e40af;
 }
 
 .upload-area p {
     margin: 0;
-    color: #555;
+    color: #cbd5e1;
 }
 
 #fileInput {
@@ -56,38 +57,45 @@ h1 {
 #preview {
     max-width: 100%;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 button {
-    margin-top: 25px;
-    background-color: #3498db;
-    color: white;
+    margin-top: 30px;
+    background-color: #38bdf8;
+    color: #0f172a;
     padding: 12px 24px;
     font-size: 16px;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
+    font-weight: 600;
     transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #2980b9;
+    background-color: #0ea5e9;
 }
 
 #status {
-    margin-top: 20px;
+    margin-top: 25px;
     font-size: 18px;
 }
 
 .result {
-    color: #2c3e50;
+    color: #34d399;
 }
 
 .error {
-    color: #e74c3c;
+    color: #f87171;
 }
 
 .loading {
-    color: #f39c12;
+    color: #facc15;
+}
+
+.file-name {
+    margin-top: 10px;
+    color: #94a3b8;
+    font-style: italic;
 }
