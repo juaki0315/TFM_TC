@@ -64,7 +64,7 @@ def preprocess_dicom_image(dicom, target_size=(512, 512)):
     img = dicom_preprocess_like_notebook(
         dicom,
         final_size=512,
-        operation='padding',
+        operation='crop',
         invert=False
     )
 
