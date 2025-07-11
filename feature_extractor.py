@@ -33,7 +33,7 @@ except ImportError:
         return img[start_h:start_h+minor_dim, start_w:start_w+minor_dim]
 
 # --- Cargar extractor de features con VGG19 ---
-full_model = load_model("best_model_epoch_19_val_loss_0.3395_val_acc_0.8645.h5")
+full_model = load_model("best_model_epoch_22_val_loss_0.5731_val_acc_0.8486.h5")
 vgg_model = full_model.get_layer("vgg19")
 conv_output = vgg_model.get_layer("block5_conv3").output
 feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
@@ -88,7 +88,7 @@ def dicom_preprocess_like_notebook(dicom, final_size=512, operation='crop', inve
     return img_resized
 
 # --- Procesamiento completo: DICOM → RGB listo para VGG ---
-def preprocess_dicom_image(dicom, target_size=(300, 300)):
+def preprocess_dicom_image(dicom, target_size=(512, 512)):
     # Preprocesamiento base como el notebook
     img = dicom_preprocess_like_notebook(
         dicom,
