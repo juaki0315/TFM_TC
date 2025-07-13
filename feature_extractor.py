@@ -80,18 +80,18 @@ def preprocess_dicom_image(dicom, target_size=(512, 512)):
     )
 
     # Debug: guardar imagen intermedia
-    cv2.imwrite("debug_1_pre_crop.png", (img * 255).astype(np.uint8))
+    # cv2.imwrite("debug_1_pre_crop.png", (img * 255).astype(np.uint8))
 
     img_cropped = humerus_crop(img, crop_size=400)
 
     # Debug: después del crop
-    cv2.imwrite("debug_2_post_crop.png", (img_cropped * 255).astype(np.uint8))
+    # cv2.imwrite("debug_2_post_crop.png", (img_cropped * 255).astype(np.uint8))
 
     # Redimensionar para VGG y mantener [0,1] normalización
     img_resized = cv2.resize(img_cropped, target_size).astype("float32")
 
     # 🔍 Guardar debug
-    cv2.imwrite("debug_3_final_resized.png", (img_resized * 255).astype(np.uint8))
+    # cv2.imwrite("debug_3_final_resized.png", (img_resized * 255).astype(np.uint8))
 
 
     return img_resized
