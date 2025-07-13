@@ -16,7 +16,7 @@ executing==2.2.0
 fastapi==0.115.14
 filelock==3.18.0
 flatbuffers==25.2.10
-gast==0.6.0
+gast<=0.4.0
 gdown==5.2.0
 google-pasta==0.2.0
 grpcio==1.73.1
