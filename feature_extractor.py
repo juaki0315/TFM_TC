@@ -16,20 +16,27 @@ def humerus_crop(img, crop_size=400):
     start_w = (w - crop_size) // 2
     return img[start_h:start_h + crop_size, start_w:start_w + crop_size]
 
-# --- Cargar extractor de features con VGG19 ---
-model_filename = "best_model_epoch_22_val_loss_0.5731_val_acc_0.8486.h5"
-model_id = "1-C5gKMIcma0TvCu0PIrulj34eSrGb3U3"  # <-- Pega aquí el ID del archivo
+# --- Cargar extractor de features solo cuando se necesite ---
+_feature_extractor = None
 
-if not os.path.exists(model_filename):
-    print("Descargando modelo .h5 desde Google Drive...")
-    url = f"https://drive.google.com/uc?id={model_id}"
-    gdown.download(url, model_filename, quiet=False)
+def get_feature_extractor():
+    global _feature_extractor
 
-# --- Cargar extractor de features con VGG19 ---
-full_model = load_model(model_filename, compile=False)
-vgg_model = full_model.get_layer("vgg19")
-conv_output = vgg_model.get_layer("block5_conv3").output
-feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
+    if _feature_extractor is None:
+        model_filename = "best_model_epoch_22_val_loss_0.5731_val_acc_0.8486.h5"
+        model_id = "1-C5gKMIcma0TvCu0PIrulj34eSrGb3U3"
+
+        if not os.path.exists(model_filename):
+            print("Descargando modelo .h5 desde Google Drive...")
+            url = f"https://drive.google.com/uc?id={model_id}"
+            gdown.download(url, model_filename, quiet=False)
+
+        full_model = load_model(model_filename, compile=False)
+        vgg_model = full_model.get_layer("vgg19")
+        conv_output = vgg_model.get_layer("block5_conv3").output
+        _feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
+
+    return _feature_extractor
 
 # --- Calcular edad desde fecha DICOM ---
 def calculate_age_from_dicom(birth_date):
@@ -79,25 +86,13 @@ def preprocess_dicom_image(dicom, target_size=(512, 512)):
         invert=False
     )
 
-    # Debug: guardar imagen intermedia
-    # cv2.imwrite("debug_1_pre_crop.png", (img * 255).astype(np.uint8))
-
     img_cropped = humerus_crop(img, crop_size=400)
-
-    # Debug: después del crop
-    # cv2.imwrite("debug_2_post_crop.png", (img_cropped * 255).astype(np.uint8))
-
-    # Redimensionar para VGG y mantener [0,1] normalización
     img_resized = cv2.resize(img_cropped, target_size).astype("float32")
-
-    # 🔍 Guardar debug
-    # cv2.imwrite("debug_3_final_resized.png", (img_resized * 255).astype(np.uint8))
-
-
     return img_resized
 
 # --- Extraer vector de características ---
 def extract_features_from_image(img_tensor):
+    feature_extractor = get_feature_extractor()
     fmap = feature_extractor.predict(np.expand_dims(img_tensor, axis=0))
     pooled = GlobalMaxPooling2D()(fmap).numpy().squeeze()
     return pooled
