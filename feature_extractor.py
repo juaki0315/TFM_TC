@@ -1,3 +1,5 @@
+import os
+import gdown
 import numpy as np
 import cv2
 import pydicom
@@ -15,7 +17,16 @@ def humerus_crop(img, crop_size=400):
     return img[start_h:start_h + crop_size, start_w:start_w + crop_size]
 
 # --- Cargar extractor de features con VGG19 ---
-full_model = load_model("best_model_epoch_22_val_loss_0.5731_val_acc_0.8486.h5")
+model_filename = "best_model_epoch_22_val_loss_0.5731_val_acc_0.8486.h5"
+model_id = "1-C5gKMIcma0TvCu0PIrulj34eSrGb3U3"  # <-- Pega aquí el ID del archivo
+
+if not os.path.exists(model_filename):
+    print("Descargando modelo .h5 desde Google Drive...")
+    url = f"https://drive.google.com/uc?id={model_id}"
+    gdown.download(url, model_filename, quiet=False)
+
+# --- Cargar extractor de features con VGG19 ---
+full_model = load_model(model_filename)
 vgg_model = full_model.get_layer("vgg19")
 conv_output = vgg_model.get_layer("block5_conv3").output
 feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
