@@ -26,7 +26,7 @@ if not os.path.exists(model_filename):
     gdown.download(url, model_filename, quiet=False)
 
 # --- Cargar extractor de features con VGG19 ---
-full_model = load_model(model_filename)
+full_model = load_model(model_filename, compile=False)
 vgg_model = full_model.get_layer("vgg19")
 conv_output = vgg_model.get_layer("block5_conv3").output
 feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
