@@ -33,7 +33,7 @@ def get_feature_extractor():
 
         full_model = load_model(model_filename, compile=False)
         vgg_model = full_model.get_layer("vgg19")
-        conv_output = vgg_model.get_layer("block5_conv3").output
+        conv_output = vgg_model.get_layer("block5_conv4").output
         _feature_extractor = Model(inputs=vgg_model.input, outputs=conv_output)
 
     return _feature_extractor
@@ -55,6 +55,8 @@ def dicom_preprocess_like_notebook(dicom, final_size=512, operation='crop', inve
     img -= np.min(img)
     img /= np.max(img) if np.max(img) != 0 else 1.0
     img_rgb = np.stack([img] * 3, axis=-1)
+
+    cv2.imwrite("1_dicom_preprocesada.png", (img_rgb * 255).astype(np.uint8))
 
     h, w, _ = img_rgb.shape
     if operation == 'crop':
@@ -87,7 +89,9 @@ def preprocess_dicom_image(dicom, target_size=(512, 512)):
     )
 
     img_cropped = humerus_crop(img, crop_size=400)
+    cv2.imwrite("2_humerus_crop.png", (img_cropped * 255).astype(np.uint8))
     img_resized = cv2.resize(img_cropped, target_size).astype("float32")
+    cv2.imwrite("3_imagen_final_512x512.png", (img_resized * 255).astype(np.uint8))
     return img_resized
 
 # --- Extraer vector de características ---
